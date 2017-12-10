@@ -1,6 +1,6 @@
-*.pyc     # compiled python files
-*.exe     # executable files
-*.dll     # executable files
+*.pyc
+*.exe
+*.dll
 
 BACKUP/
 thirdparty/
