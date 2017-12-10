@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+#
+# requires python 2.7
 
 import os
 import sys
@@ -8,13 +10,6 @@ import time
 import Tkinter
 import tkSimpleDialog
 import tkMessageBox
-
-if os.name=="nt":
-    clearToolCommand = "\"c:\\Program Files\\Rational\\ClearCase\\bin\\cleartool.exe\""
-    clearDiffCommand = "\"c:\\Program Files\\Rational\\ClearCase\\bin\\cleardiff.exe\" -diff"
-else:
-    clearToolCommand = "/usr/atria/bin/cleartool"
-    clearDiffCommand = "/usr/atria/bin/cleardiff -diff"
 
 def matchLongOption(arg,opt):
     x=string.find(opt,"/")
@@ -819,13 +814,10 @@ def usage(msg=None):
         sys.stderr.write(msg)
         sys.stderr.write("\n\n")
     sys.stderr.write("xdiff.py: diff two files\n")
-    sys.stderr.write("Usage: python $QAPY/xdiff.py [ options ] file1 file2\n")
+    sys.stderr.write("Usage: xdiff.py [ options ] file1 file2\n")
     sys.stderr.write("Options:\n")
     sys.stderr.write("    -w                  Unix diff -w (ignores all blanks)\n")
     sys.stderr.write("    -b                  Unix diff -b (ignores trailing blanks)\n")
-    sys.stderr.write("    -cleardiff          use cleardiff instead  of Unix-diff\n")
-    sys.stderr.write("    -pre/decessor       cleardiff -predecessor\n")
-    sys.stderr.write("    -b/lank_ignore      cleardiff -blank_ignore\n")
     sys.exit(2)
 
 if __name__ == "__main__":
@@ -833,63 +825,24 @@ if __name__ == "__main__":
    fileName2 = None
 
    # default values
-   cleardiffFlag = 0
-
-   #if os.name == "nt":
-   #    # Windows platforms must always use cleardiff, 
-   #    # because unix-diff is not available.
-   #    cleardiffFlag = 1
-   #else:
-   #    cleardiffFlag = 0
-
-   predecessorFlag = 0
    ignoreBlankFlagString = ""
 
    for arg in sys.argv[1:]:
        if arg[:1] == "-":
-           if arg == "-cleardiff":
-               cleardiffFlag = 1
-
-   for arg in sys.argv[1:]:
-       if arg[:1] == "-":
-           if matchLongOption(arg,"-pre/decessor"):
-               predecessorFlag = 1
+           if arg == "-w":
+               ignoreBlankFlagString = "-w"
+           elif arg == "-b":
+               ignoreBlankFlagString = "-b"
            else:
-               if cleardiffFlag:
-                   if arg == "-cleardiff":
-                       pass
-                   elif matchLongOption(arg,"-b/lank_ignore"):
-                       ignoreBlankFlagString = "-blank_ignore"
-                   else:
-                       usage("Unknown command line option\""+arg+"\" for cleardiff.")
-               else:
-                   if arg == "-w":
-                       ignoreBlankFlagString = "-w"
-                   elif arg == "-b":
-                       ignoreBlankFlagString = "-b"
-                   else:
-                       usage("Unknown command line option\""+arg+"\" for Unix-diff.")
+               usage("Unknown command line option\""+arg+"\" for Unix-diff.")
        else:
            if fileName1 is None:
-               fileName1=arg
+               fileName1 = arg
            else:
                if fileName2 is None:
-                   fileName2=arg
+                   fileName2 = arg
                else:
                    usage("Too many parameters.")
-
-   if predecessorFlag:
-       if fileName1 is None or fileName2 is not None:
-           usage("-pre/decessor option can only be used with one file name.")
-       shortName=string.split(fileName1,"@@")[0]
-       f=os.popen(clearToolCommand+" describe -short "+fileName1)
-       fileName2=string.strip(f.read())
-       f.close()
-       f=os.popen(clearToolCommand+" describe -short -predecessor "+fileName1)
-       fileName1=shortName+"@@"+string.strip(f.read())
-       f.close()
-       if string.split(fileName2,os.sep)[-1] == "CHECKEDOUT":
-           fileName2=shortName
 
    if fileName1 is None or fileName2 is None:
        usage("Two file names expected.")
@@ -913,8 +866,8 @@ if __name__ == "__main__":
        leftStream=open(fileName1)
        line=leftStream.readline()
        while line != "":
-	   leftData.append([line,None])
-	   line=leftStream.readline()
+           leftData.append([line,None])
+           line=leftStream.readline()
        leftStream.close()
 
        tool.rightLabel.insert(Tkinter.END,fileName2)
@@ -924,21 +877,18 @@ if __name__ == "__main__":
        rightStream=open(fileName2)
        line=rightStream.readline()
        while line != "":
-	   rightData.append([line,None])
-	   line=rightStream.readline()
+           rightData.append([line,None])
+           line=rightStream.readline()
        rightStream.close()
 
-       if cleardiffFlag:
-	   diffCommand = clearDiffCommand 
-       else:
-           if os.name == "nt":
-               diffCommand = "diff"
-           else: 
-               diffCommand = "/usr/bin/diff"
+       if os.name == "nt":
+           diffCommand = "diff"
+       else: 
+           diffCommand = "/usr/bin/diff"
         
 
        if ignoreBlankFlagString != "":
-	   diffCommand = diffCommand + " " + ignoreBlankFlagString
+           diffCommand = diffCommand + " " + ignoreBlankFlagString
 
        diffCommand = diffCommand + " " + fileName1 + " " + fileName2
 
@@ -946,116 +896,116 @@ if __name__ == "__main__":
        diffStream=os.popen(diffCommand)
        diffLine=diffStream.readline()
        while diffLine != "":
-	   diffLine=string.rstrip(diffLine)
-	   if (len(diffLine)>=1 and
+           diffLine=string.rstrip(diffLine)
+           if (len(diffLine)>=1 and
                diffLine[0] != ">" and
                diffLine[0] != "<" and
                diffLine != "---"):
                #print diffLine
                for x in ["a","c","d"]:
-        	   fields=string.split(diffLine,x)
-        	   assert(len(fields)==1 or len(fields)==2)
-        	   if len(fields)==2:
+                   fields=string.split(diffLine,x)
+                   assert(len(fields)==1 or len(fields)==2)
+                   if len(fields)==2:
                        leftfields=string.split(fields[0],",")
                        assert(len(leftfields)<=2)
                        a1=int(leftfields[0])
                        if len(leftfields)==1:
-                	   a2=a1
+                           a2=a1
                        else:
-                	   a2=int(leftfields[1])
+                           a2=int(leftfields[1])
                        rightfields=string.split(fields[1],",")
                        assert(len(rightfields)<=2)
                        b1=int(rightfields[0])
                        if len(rightfields)==1:
-                	   b2=b1
+                           b2=b1
                        else:
-                	   b2=int(rightfields[1])
+                           b2=int(rightfields[1])
                        tool.diffRecords.append((x,a1,a2,b1,b2))
-	   diffLine=diffStream.readline()
+           diffLine=diffStream.readline()
        diffStream.close()
 
        # print "diffRecords:", tool.diffRecords
 
        if len(tool.diffRecords)==0: 
-	   msg="No differences found."
-	   print msg
-	   tool.setStatus(msg)
+           msg="No differences found."
+           print msg
+           tool.setStatus(msg)
        elif len(tool.diffRecords)==1:
-	   msg=str(len(tool.diffRecords))+" difference found."
-	   print msg
-	   tool.setStatus(msg)
+           msg=str(len(tool.diffRecords))+" difference found."
+           print msg
+           tool.setStatus(msg)
        else:
-	   msg=str(len(tool.diffRecords))+" differences found."
-	   print msg
-	   tool.setStatus(msg)
+           msg=str(len(tool.diffRecords))+" differences found."
+           print msg
+           tool.setStatus(msg)
 
        tool.diffRecords.reverse()
 
        # first traversal, (do not modify the tool.diffRecords)
        for t,a1,a2,b1,b2 in tool.diffRecords:
-	   if t=="a":
+           if t=="a":
                # something that only exists on the right side
                assert(a1==a2)
                assert(b1<=b2)
                i=b1
                while i<=b2:
-        	   rightData[i-1][1]="red" 
-        	   i=i+1
+                   rightData[i-1][1]="red" 
+                   i=i+1
 
-	   if t=="d":
+           if t=="d":
                # something that only exists on the left side
                assert(b1==b2)
                assert(a1<=a2)
                i=a1
                while i<=a2:
-        	   leftData[i-1][1]="green"
-        	   i=i+1
+                   leftData[i-1][1]="green"
+                   i=i+1
 
-	   if t=="c":
+           if t=="c":
                # something that exists on both side
                assert(a1<=a2)
                assert(b1<=b2)
                i=a1
                while i<=a2:
-        	   leftData[i-1][1]="blue"
-        	   i=i+1
+                   leftData[i-1][1]="blue"
+                   i=i+1
                i=b1
                while i<=b2:
-        	   rightData[i-1][1]="blue"
-        	   i=i+1
+                   rightData[i-1][1]="blue"
+                   i=i+1
 
        for t,a1,a2,b1,b2 in tool.diffRecords:
            #print t,a1,a2,b1,b2
-	   if t=="a":
-        	# something that only exists on the right side
-        	assert(a1==a2)
-        	assert(b1<=b2)
-        	i=b1
-        	while i<=b2:
+           if t=="a":
+                # something that only exists on the right side
+                assert(a1==a2)
+                assert(b1<=b2)
+                i=b1
+                while i<=b2:
                     leftData.insert(a1,["\n","red"])
                     i=i+1
-	   if t=="d":
-        	# something that only exists on the left side
-        	assert(b1==b2)
-        	assert(a1<=a2)
-        	i=a1
-        	while i<=a2:
+           if t=="d":
+                # something that only exists on the left side
+                assert(b1==b2)
+                assert(a1<=a2)
+                i=a1
+                while i<=a2:
                     rightData.insert(b1,["\n","green"])
                     i=i+1
-	   if t=="c":
-        	# something that changed between the two sides
-        	assert(a1<=a2)
-        	assert(b1<=b2)
-        	if a2-a1 < b2-b1:
+           if t=="c":
+                # something that changed between the two sides
+                assert(a1<=a2)
+                assert(b1<=b2)
+                if a2-a1 < b2-b1:
                     i=b1+a2-a1
                     while i<b2:
-                	leftData.insert(a2,["\n","blue"])
-                	i=i+1
-        	elif a2-a1 > b2-b1:
+                        leftData.insert(a2,["\n","blue"])
+                        i=i+1
+                elif a2-a1 > b2-b1:
                     i=a1+b2-b1
                     while i<a2:
-                	rightData.insert(b2,["\n","blue"])
-                	i=i+1
+                        rightData.insert(b2,["\n","blue"])
+                        i=i+1
 
        tool.diffRecords.reverse()   # for canvasChanged in ascending order
 
@@ -1064,16 +1014,16 @@ if __name__ == "__main__":
        a=None
        b=None
        for x,t in leftData+[("Dummy",None)]:
-	   if t != oldTag:
+           if t != oldTag:
                if a is not None:
-        	   b=lineNumber
-        	   tool.navigationList.append((a,b,oldTag))
+                   b=lineNumber
+                   tool.navigationList.append((a,b,oldTag))
                if t is None:
-        	   a=None
+                   a=None
                else:
-        	   a=lineNumber
-	   oldTag=t
-	   lineNumber=lineNumber+1
+                   a=lineNumber
+           oldTag=t
+           lineNumber=lineNumber+1
 
        tool.totalLines=lineNumber-2 
 
@@ -1109,10 +1059,10 @@ if __name__ == "__main__":
 
        lineNumber=0
        while lineNumber<tool.totalLines:
-	   leftLine,leftTag=leftData[lineNumber]
-	   rightLine,rightTag=rightData[lineNumber]
-	   assert(leftTag==rightTag)
-	   if (leftTag == "blue" and 
+           leftLine,leftTag=leftData[lineNumber]
+           rightLine,rightTag=rightData[lineNumber]
+           assert(leftTag==rightTag)
+           if (leftTag == "blue" and 
                leftLine != "" and leftLine != "\n" and
                rightLine != "" and rightLine != "\n"):
                xdleft,ydleft,xdright,ydright = onelinediff(leftLine,rightLine)
@@ -1125,10 +1075,10 @@ if __name__ == "__main__":
                tool.rightText.insert(Tkinter.END,rightLine[:xdright],"blue")
                tool.rightText.insert(Tkinter.END,rightLine[xdright:len(rightLine)-ydright],"bluediffchar")
                tool.rightText.insert(Tkinter.END,rightLine[len(rightLine)-ydright:],"blue")
-	   else:
+           else:
                tool.leftText.insert(Tkinter.END,leftLine,leftTag)
                tool.rightText.insert(Tkinter.END,rightLine,rightTag)
-	   lineNumber=lineNumber+1
+           lineNumber=lineNumber+1
 
        tool.navigateToIndex()
    except IOError, ex:
