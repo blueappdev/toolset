@@ -2,6 +2,7 @@
 #
 # bulkrename.py
 #
+# requires python 2.7
 
 import re, os, sys
 
