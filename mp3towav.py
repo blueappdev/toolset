@@ -1,7 +1,11 @@
 #!/usr/bin/python
-
+#
 # mp3towav.py
+#
+# requires python 2.7
+#
 # MP3 to WAV conversion using ffmpeg
+#
 
 import sys, getopt, glob, os.path
 
