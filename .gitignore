@@ -1,0 +1,6 @@
+*.pyc     # compiled python files
+*.exe     # executable files
+*.dll     # executable files
+
+BACKUP/
+thirdparty/
