@@ -48,11 +48,4 @@ if __name__ == "__main__":
              print("No files found for", eachFilePattern)
         for each in files:
             processFile(each)
-            
- 
-
-               
-
-   
-    
-    
+             
