@@ -19,6 +19,8 @@ class Formatter:
         for pattern in arguments:
             for file in glob.glob(pattern):
                 self.processFile(file)
+        if self.counter == 0:
+            print "tabby.py: No file processed."
 
     def exit(self, message):
         print message
@@ -28,6 +30,7 @@ class Formatter:
         self.readFile(aFilename)
         for each in self.sheets:
             self.printSheet(each)
+        self.counter += 1
 
     #
     # A sheet is a list of records.
