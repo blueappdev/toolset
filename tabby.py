@@ -71,7 +71,7 @@ class TextFileReader(FileReader):
     #
     def getWorkbook(self):
         self.workbook = Workbook()
-	self.workbook.addSheet(Sheet())
+        self.workbook.addSheet(Sheet())
         stream = open(self.filename)
         for each in stream.readlines():
             self.currentSheet().addRecord(map(string.strip, each.split("\t")))
@@ -96,7 +96,7 @@ class XMLFileReader(FileReader):
 
     def processWorksheet(self, anXMLElement):
         self.currentSheet = Sheet()
-	self.workbook.addSheet(self.currentSheet)
+        self.workbook.addSheet(self.currentSheet)
         for each in anXMLElement:
             if self.hasTag(each, "Table"):
                 self.processTable(each)
