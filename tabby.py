@@ -131,7 +131,7 @@ class XMLFileReader(FileReader):
 
 class Formatter:
     def __init__(self, someArguments):
-        self.indexesToExtract = None  # by default extract all
+        self.indexesToExtract = None  # by default extract all worksheets
         options, arguments = getopt.getopt(someArguments, "s:h")
 
         for key, value in options:
@@ -141,7 +141,7 @@ class Formatter:
              elif key == "-s":
                  self.setWorksheetsToExtractFromOptionValue(value)    
              else:
-                 exit("unsupported option")
+                 exit("unsupported option [%s]" % key)
 
         if arguments == []:
             exit("no arguments found")
@@ -155,10 +155,11 @@ class Formatter:
 
     def usage(self):
         print "tabby.py: extract excel data"
-        print "usage: tabby.py [-h] -[s num] file [ file...]"
+        print "usage: tabby.py [-h] [-s num] file [ file...]"
         print "  -h - help"
         print "  -s num (integer)"
-        print "    extract worksheet with index num"
+        print "    extract worksheet with index num,"
+        print "    e.g -s 2 extracts the second workseet"
 
     def setWorksheetsToExtractFromOptionValue(self, optionValue):
         self.indexesToExtract = [ int(optionValue) ]

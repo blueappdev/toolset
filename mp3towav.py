@@ -32,7 +32,6 @@ class MP3ToWavConverter:
                 "thirdparty", 
                 "ffmpeg.exe")
         cmd = "%s -y -v 0 -i \"%s\" \"%s\"" % (cmdFilename, mp3Filename, wavFilename)
-        print cmd
         code = os.system(cmd)
         if code != 0:
              print "ffmpeg failed"
