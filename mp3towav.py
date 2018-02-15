@@ -27,7 +27,12 @@ class MP3ToWavConverter:
         baseFilename, extension = os.path.splitext(mp3Filename)
         assert extension.lower() == ".mp3", "only mp3 files are supported"
         wavFilename = baseFilename + ".wav"
-        cmd = "ffmpeg -y -v 0 -i \"%s\" \"%s\"" % (mp3Filename, wavFilename)
+        cmdFilename = os.path.join(os.path.dirname(
+                sys.argv[0]), 
+                "thirdparty", 
+                "ffmpeg.exe")
+        cmd = "%s -y -v 0 -i \"%s\" \"%s\"" % (cmdFilename, mp3Filename, wavFilename)
+        print cmd
         code = os.system(cmd)
         if code != 0:
              print "ffmpeg failed"
