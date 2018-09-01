@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 #
+# xdiff.py
+#
 # requires python 2.7
+#
 
 import os
 import sys
