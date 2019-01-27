@@ -197,7 +197,7 @@ class DiffTool(Tkinter.Frame):
         self.createToolbar()
         self.createStatusLine()
 
-        self.mainFrame=Tkinter.Frame(self.master,width=800,height=600)
+        self.mainFrame=Tkinter.Frame(self.master,width=1200,height=720)
         self.master.bind("<Control-f>", self.onViewFind)
         self.master.bind("<F3>", self.onViewFindAgain)
 
