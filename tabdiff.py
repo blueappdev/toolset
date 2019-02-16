@@ -6,20 +6,13 @@
 #
 
 import sys, getopt, glob
+import string
 import lib.tableparser
 
 class Differ:
     def __init__(self, someArguments):
         self.options, self.arguments = getopt.getopt(someArguments, "s:h")
 
-    def usage(self):
-        print "tabby.py: extract excel data"
-        print "usage: tabby.py [-h] [-s num] file [ file...]"
-        print "  -h - help"
-        print "  -s num (integer)"
-        print "    extract worksheet with index num,"
-        print "    e.g -s 2 extracts the second workseet"
-        
     def process(self):
         self.workbook1 = None
         self.workbook2 = None
@@ -47,12 +40,14 @@ class Differ:
             self.workbook2 = self.readFile(aFilename)
             return
         exit("Too many files")
-
         
     def readFile(self, aFilename):
-        return lib.tableparser.FileReaderInterface(aFilename).getWorkbook()
+        workbook =  lib.tableparser.FileReaderInterface(aFilename).getWorkbook()
+        workbook.simplidy()
+        return workbook
     
     def compare(self):
+        self.numbderOfDifferences = 0
         if self.workbook1 is None or self.workbook2 is None:
             exit("two files required")
         numberOfSheets1 = len(self.workbook1.sheets)
@@ -72,7 +67,7 @@ class Differ:
         numberOfRecords1 = len(sheet1.records)
         numberOfRecords2 = len(sheet2.records)
         if numberOfRecords1 != numberOfRecords2:
-            print "Sheet", sheetIndex,"Number of rows is different"
+            print "Sheet", sheetIndex,"Number of rows is different", numberOfRecords1, numberOfRecords2
         numberOfRecords = max(numberOfRecords1, numberOfRecords2)
         for each in range(1, numberOfRecords + 1):
             record1 = sheet1.getRecordWithIndex(each)
@@ -84,28 +79,39 @@ class Differ:
         numberOfFields2 = len(record2)
         numberOfFields = max(numberOfFields1, numberOfFields2)
         for each in range(1, numberOfFields + 1):
-            field1 = self.getField(record1, each, "")
-            field2 = self.getField(record2, each, "")  
+            field1 = self.getField(record1, each)
+            field2 = self.getField(record2, each)  
             if field1 != field2:
                  self.printDifference(sheetIndex, recordIndex, each, field1, field2)
 
     # The index is based on one and not on zero.                 
-    def getField(self, record, index, default):
+    def getField(self, record, index, default = ""):
         try:
-            return record[index-1]
+            value record[index-1]
         except IndexError:
+            value = None
+        if value is None:
             return default
+        # Be a bit tolerant.
+        value = value.strip()
+        # Truncate trailing zeros after the decimal point.
+        parts = value.split(".")
+        if len(parts) == 2 and parts[-1].isdigit():
+            a, b = parts
+            value = a + "." + b.rstrip("0")
+            value = value.strip(".")
+        return value
             
     def printDifference(self, sheetIndex, recordIndex, fieldIndex, field1, field2):
         indicator = self.indicator(sheetIndex, recordIndex, fieldIndex)
-        print indicator, field1, "<>", field2
+        print indicator, "<" + field1 + ">", "<" + field2 + ">"
     
     def indicator(self, sheetIndex, recordIndex, fieldIndex):
         return '%d.%s:' % (sheetIndex, self.excelReference(recordIndex, fieldIndex))
 
     # Convert given row and column number to an Excel-style cell name.        
-    def excelReference(self, row, col):
-        quot, rem = divmod(col-1, 26)
+    def excelReference(self, row, column):
+        quot, rem = divmod(column - 1, 26)
         return((chr(quot-1 + ord('A')) if quot else '') +
                (chr(rem + ord('A')) + str(row)))
 
