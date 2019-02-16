@@ -12,6 +12,7 @@ import lib.tableparser
 class Differ:
     def __init__(self, someArguments):
         self.options, self.arguments = getopt.getopt(someArguments, "s:h")
+        self.maxNumberOfDifferences = 20
 
     def process(self):
         self.workbook1 = None
@@ -22,7 +23,7 @@ class Differ:
                   self.usage()
                   exit()
              elif key == "-s":
-                 self.setWorksheetsToProcessFromOptionValue(value)    
+                 self.setWorksheetsToProcessFromOptionValue(value)
              else:
                  exit("unsupported option [%s]" % key)
         if self.arguments == []:
@@ -31,7 +32,7 @@ class Differ:
             for file in glob.glob(pattern):
                 self.processFile(file)
         self.compare()
-            
+
     def processFile(self, aFilename):
         if self.workbook1 is None:
             self.workbook1 = self.readFile(aFilename)
@@ -40,14 +41,14 @@ class Differ:
             self.workbook2 = self.readFile(aFilename)
             return
         exit("Too many files")
-        
+
     def readFile(self, aFilename):
-        workbook =  lib.tableparser.FileReaderInterface(aFilename).getWorkbook()
-        workbook.simplidy()
+        workbook = lib.tableparser.FileReaderInterface(aFilename).getWorkbook()
+        #workbook.simplidy()
         return workbook
-    
+
     def compare(self):
-        self.numbderOfDifferences = 0
+        self.numberOfDifferences = 0
         if self.workbook1 is None or self.workbook2 is None:
             exit("two files required")
         numberOfSheets1 = len(self.workbook1.sheets)
@@ -62,7 +63,7 @@ class Differ:
             sheet1 = self.workbook1.getSheetWithIndex(each)
             sheet2 = self.workbook2.getSheetWithIndex(each)
             self.compareSheets(each, sheet1, sheet2)
-            
+
     def compareSheets(self, sheetIndex, sheet1, sheet2):
         numberOfRecords1 = len(sheet1.records)
         numberOfRecords2 = len(sheet2.records)
@@ -72,22 +73,25 @@ class Differ:
         for each in range(1, numberOfRecords + 1):
             record1 = sheet1.getRecordWithIndex(each)
             record2 = sheet2.getRecordWithIndex(each)
-            self.compareRecords(sheetIndex, each, record1, record2) 
-    
+            self.compareRecords(sheetIndex, each, record1, record2)
+
     def compareRecords(self, sheetIndex, recordIndex, record1, record2):
         numberOfFields1 = len(record1)
         numberOfFields2 = len(record2)
         numberOfFields = max(numberOfFields1, numberOfFields2)
         for each in range(1, numberOfFields + 1):
             field1 = self.getField(record1, each)
-            field2 = self.getField(record2, each)  
+            field2 = self.getField(record2, each)
             if field1 != field2:
                  self.printDifference(sheetIndex, recordIndex, each, field1, field2)
+                 self.numberOfDifferences += 1
+                 if self.numberOfDifferences > selfd.maxNumberOfDiffferences:
+                     says.exit(1)
 
-    # The index is based on one and not on zero.                 
+    # The index is based on one and not on zero.
     def getField(self, record, index, default = ""):
         try:
-            value record[index-1]
+            value = record[index-1]
         except IndexError:
             value = None
         if value is None:
@@ -101,15 +105,16 @@ class Differ:
             value = a + "." + b.rstrip("0")
             value = value.strip(".")
         return value
-            
+
+
     def printDifference(self, sheetIndex, recordIndex, fieldIndex, field1, field2):
         indicator = self.indicator(sheetIndex, recordIndex, fieldIndex)
         print indicator, "<" + field1 + ">", "<" + field2 + ">"
-    
+
     def indicator(self, sheetIndex, recordIndex, fieldIndex):
         return '%d.%s:' % (sheetIndex, self.excelReference(recordIndex, fieldIndex))
 
-    # Convert given row and column number to an Excel-style cell name.        
+    # Convert given row and column number to an Excel-style cell name.
     def excelReference(self, row, column):
         quot, rem = divmod(column - 1, 26)
         return((chr(quot-1 + ord('A')) if quot else '') +
