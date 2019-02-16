@@ -68,7 +68,7 @@ class Differ:
         numberOfRecords1 = len(sheet1.records)
         numberOfRecords2 = len(sheet2.records)
         if numberOfRecords1 != numberOfRecords2:
-            print "Sheet", sheetIndex,"Number of rows is different", numberOfRecords1, numberOfRecords2
+            print "Sheet", sheetIndex, "Number of rows is different", numberOfRecords1, numberOfRecords2
         numberOfRecords = max(numberOfRecords1, numberOfRecords2)
         for each in range(1, numberOfRecords + 1):
             record1 = sheet1.getRecordWithIndex(each)
@@ -85,8 +85,8 @@ class Differ:
             if field1 != field2:
                  self.printDifference(sheetIndex, recordIndex, each, field1, field2)
                  self.numberOfDifferences += 1
-                 if self.numberOfDifferences > selfd.maxNumberOfDiffferences:
-                     says.exit(1)
+                 if self.numberOfDifferences > self.maxNumberOfDifferences:
+                     sas.exit(1)
 
     # The index is based on one and not on zero.
     def getField(self, record, index, default = ""):
