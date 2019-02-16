@@ -43,9 +43,7 @@ class Differ:
         exit("Too many files")
 
     def readFile(self, aFilename):
-        workbook = lib.tableparser.FileReaderInterface(aFilename).getWorkbook()
-        #workbook.simplidy()
-        return workbook
+        return lib.tableparser.FileReaderInterface(aFilename).getWorkbook()
 
     def compare(self):
         self.numberOfDifferences = 0
@@ -86,7 +84,7 @@ class Differ:
                  self.printDifference(sheetIndex, recordIndex, each, field1, field2)
                  self.numberOfDifferences += 1
                  if self.numberOfDifferences > self.maxNumberOfDifferences:
-                     sas.exit(1)
+                     sys.exit(1)
 
     # The index is based on one and not on zero.
     def getField(self, record, index, default = ""):
