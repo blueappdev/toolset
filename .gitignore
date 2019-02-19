@@ -3,6 +3,7 @@
 *.dll
 *.bat
 *.cmd
+*.swp
 
 BACKUP/
 thirdparty/
