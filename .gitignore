@@ -4,6 +4,7 @@
 *.bat
 !gitdiff.bat
 *.cmd
+*.swp
 
 BACKUP/
 thirdparty/
